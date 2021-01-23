@@ -1,0 +1,267 @@
+
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.regex.Pattern;
+import java.util.concurrent.TimeUnit;
+
+import org.joda.time.DateTime;
+
+public class DateUtils {
+
+    public static String DATE_REGEX = "^(0[1-9]|[12][0-9]|3[01])[/](0[1-9]|1[012])[/](19|20)\\d\\d$";
+
+    public static String DATE_PATTERN = "dd/MM/yyyy";
+
+    public static String DATE_PATTERNF958 = "ddMMyyyy";
+
+    public static String DATE_MONTH_PATTERN = "MM/yyyy";
+
+    public static String DATE_ONLY_MONTH_PATTERN = "MM";
+
+    public static String DATE_ONLY_YEAR_PATTERN = "yyyy";
+
+    public static Date getPeriodoStart() {
+        return new DateTime(pastYear().getYear(), 1, 1, 0, 0, 0, 0).toDate();
+    }
+
+    public static Date getPeriodoEnd() {
+        return new DateTime(pastYear().getYear(), 12, 31, 0, 0, 0, 0).toDate();
+    }
+    
+
+    public static DateTime pastYear() {
+        return new DateTime().minusYears(1);
+    }
+
+    public static DateTime pastMonth() {
+        return new DateTime().minusMonths(1);
+    }
+
+    /*public static int getPeriodoYear(){
+     return new DateTime(pastYear().getYear(), 1, 1, 0, 0, 0, 0).getYear();
+     }*/
+    public static String getPeriodoYear() {
+        return String.valueOf(new DateTime(pastYear().getYear(), 1, 1, 0, 0, 0, 0).getYear());
+    }
+    
+    public static String getPeriodoYear(Date periodo) {    	
+        return String.valueOf(new DateTime(periodo).getYear());
+    }
+    
+    public static int getYear(Date periodo) {    	
+        return new DateTime(periodo).getYear();
+    }
+
+    public static int getPeriodoYearInt() {
+        return new DateTime(pastYear().getYear(), 1, 1, 0, 0, 0, 0).getYear();
+    }
+    
+    public static int getCurrentYear() {
+        return new DateTime().getYear();
+    }
+    
+    public static int getCurrentMonth() {
+        return new DateTime().getMonthOfYear();
+    }
+    
+    public static Date getFirstDayYear() {
+    	return new DateTime(getCurrentYear(), 1, 1, 0, 0, 0, 0).toDate();
+    }
+    
+    public static Date getLastDayYear() {
+        return new DateTime(getCurrentYear(), 12, 31, 23, 59, 59, 0).toDate();
+    }
+    
+    public static Date getLastDayYearByPeriodo(Date date) {
+        return new DateTime(new DateTime(date).getYear(), 12, 31, 23, 59, 59, 0).toDate();
+    }
+    
+    public static Date getLastSecondOfDate(Date date) {
+        return new DateTime(new DateTime(date).getYear(), date.getMonth()+1, date.getDate(), 23, 59, 59, 0).toDate();
+    }
+
+    public static Date getFirstSecondOfDate(Date date) {
+        return new DateTime(new DateTime(date).getYear(), date.getMonth()+1, date.getDate(), 0, 0, 1, 0).toDate();
+    }
+
+    public static Date getZeroSecondOfDate(Date date) {
+        return new DateTime(new DateTime(date).getYear(), date.getMonth()+1, date.getDate(), 0, 0, 0, 0).toDate();
+    }
+
+    public static int daysBetween(Date one, Date two) {
+        return (int)( (two.getTime() - one.getTime()) / (1000 * 60 * 60 * 24));
+    }
+    
+    public static Date getLastDayByPeriodo(Date date) {
+        return new DateTime(new DateTime(date).getYear(), 12, 31, 0, 0, 0, 0).toDate();
+    }
+
+    public static Date createDate(String str, String format) {
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
+        try {
+            if(!(str.equalsIgnoreCase("undefined") || str.equalsIgnoreCase(""))){
+                return sdf.parse(str);
+            }else{
+                return null;
+            }
+
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Date createDate(String str) {
+        return createDate(str, DATE_PATTERN);
+    }
+
+     public static Date createDateddmmyyyy(String str) {
+        return createDate(str, DATE_PATTERNF958);
+    }
+
+    public static String getFormattedDate(Date date, String format) {
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
+        return sdf.format(date);
+    }
+
+    public static String getFormattedDate(Date date) {
+        return getFormattedDate(date, DATE_PATTERN);
+    }
+
+    public static String[] rangeDatesByDate(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.set(Calendar.DATE, 1);
+
+        Date firstDateOfPreviousMonth = cal.getTime();
+
+        cal.set(Calendar.DATE, cal.getActualMaximum(Calendar.DATE));
+
+        Date lastDateOfPreviousMonth = cal.getTime();
+
+        String[] dates = {getFormattedDate(firstDateOfPreviousMonth), getFormattedDate(lastDateOfPreviousMonth)};
+        return dates;
+    }
+
+    public static Date sumarDias(Date fecha, int dias) {
+        Calendar cal = new GregorianCalendar();
+        cal.setTime(fecha);
+        cal.add(Calendar.DATE, dias);
+        return cal.getTime();
+    }
+
+    public static Date sumarMeses(Date fecha, int meses) {
+        Calendar cal = new GregorianCalendar();
+        cal.setTime(fecha);
+        cal.add(Calendar.MONTH, meses);
+        return cal.getTime();
+    }
+
+    public static List<Date> getPeriodosRenta(){
+    	int lastYear = new DateTime(pastYear().getYear(), 1, 1, 0, 0, 0, 0).getYear();
+    	List<Date> periodos = new ArrayList<Date>();    	
+    	for(int i = lastYear;i>(lastYear-4);i--){    		
+    		periodos.add(new DateTime(i, 1, 1, 0, 0, 0, 0).toDate());
+    	}
+    	return periodos;
+    }
+    
+    //En lugar del 01/01 se envian 31/12
+    public static List<Date[]> getPeriodosRentaDGT(){
+    	int lastYear = new DateTime(pastYear().getYear(), 1, 1, 0, 0, 0, 0).getYear();
+    	List<Date[]> periodos = new ArrayList<Date[]>();    	
+    	/*for(int i = lastYear;i>(lastYear-4);i--){
+    		Date[] dates = new Date[2];
+    		dates[0] = new DateTime(i, 1, 1, 0, 0, 0, 0).toDate();
+    		dates[1] = new DateTime(i, 12, 31, 0, 0, 0, 0).toDate();
+    		periodos.add(dates);
+    	}*/
+    	
+    	Date[] dates = new Date[2];
+		dates[0] = new DateTime(lastYear, 1, 1, 0, 0, 0, 0).toDate();
+		dates[1] = new DateTime(lastYear, 12, 31, 0, 0, 0, 0).toDate();
+		periodos.add(dates);
+		
+    	return periodos;
+    }
+    
+    public static List<Date> generateListFPMonth(Date fpini, Date fpfin) {
+
+        List<Date> periodos = new ArrayList<Date>();
+
+        Calendar fpcalendar = new GregorianCalendar();
+        fpcalendar.setTime(fpini);
+
+        while (fpcalendar.getTime().compareTo(fpfin) <= 0) {
+            Date newfp = fpcalendar.getTime();
+            periodos.add(newfp);
+            fpcalendar.add(Calendar.MONTH, 1);
+        }
+
+        return periodos;
+    }
+    
+    public static DateTime getCurrentDateTime(){    	
+    	return new DateTime();    	
+    }
+    
+    public static boolean isBetweenInclusive(DateTime start, DateTime end, DateTime target) {
+        return !target.isBefore(start) && !target.isAfter(end);
+    }
+    
+    public static Date setLastMinute(Date fecha) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(fecha);
+        c.add(Calendar.HOUR_OF_DAY,  23);
+        c.add(Calendar.MINUTE,  59);
+        c.add(Calendar.SECOND,  59);
+        return c.getTime();
+    }
+
+    public static Date setLasdDayDate(Date convertedDate) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(convertedDate);
+        c.set(Calendar.DAY_OF_MONTH, c.getActualMaximum(Calendar.DAY_OF_MONTH));
+        return c.getTime();
+    }
+
+    public static Date setFirstDayDate(Date convertedDate) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(convertedDate);
+        c.set(Calendar.DAY_OF_MONTH, 1);
+        return c.getTime();
+    }
+
+    public static String formatElapsedTime (long different) {
+
+        long secondsInMilli = 1000;
+        long minutesInMilli = secondsInMilli * 60;
+        long hoursInMilli = minutesInMilli * 60;
+        long daysInMilli = hoursInMilli * 24;
+
+        long hours = different / hoursInMilli;
+        different = different % hoursInMilli;
+
+        long minutes = different / minutesInMilli;
+        different = different % minutesInMilli;
+
+        long seconds = different / secondsInMilli;
+
+        return String.format ("%d h, %d m, %d s", hours, minutes, seconds);
+    }
+
+    public static boolean verifyDateFormat(String date) {
+        return verifyDateFormat(date, DATE_REGEX);
+    }
+
+    public static boolean verifyDateFormat(String date, String RegEx) {
+        Pattern p = Pattern.compile(RegEx);
+        return p.matcher(date).matches();
+    }
+
+}
